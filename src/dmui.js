@@ -1,5 +1,5 @@
 /**
- * @author kid
+ * @author kid 张
  */
 
 var dmui = { REVISION: '1' };
