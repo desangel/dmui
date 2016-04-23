@@ -1,2 +1,2 @@
-+# dmui
-+a mobile ui framework with lighter, faster, easier using.
+# dmui
+a mobile ui framework with lighter, faster, easier using.
