@@ -29,10 +29,10 @@ module.exports = function(grunt) {
 	var fs = require( "fs" ),
 		//gzip = require( "gzip-js" ),
 		
-		// Skip jsdom-related tests in Node.js 0.10 & 0.12
-		//runJsdomTests = !/^v0/.test( process.version ),
+		srcHintOptions = readOptionalJSON( "js/.jshintrc" ),
 		
-		srcHintOptions = readOptionalJSON( "js/.jshintrc" );
+		// Skip jsdom-related tests in Node.js 0.10 & 0.12
+		runJsdomTests = !/^v0/.test( process.version );
 		
 	if ( !grunt.option( "filename" ) ) {
 		grunt.option( "filename", "js/dmui.js" );
@@ -56,24 +56,13 @@ module.exports = function(grunt) {
 			' * =====================================================\n' +
 			' */\n',
 
+		//tasks
 		clean: {
 			all: ['<%= meta.distPath %>'],
 			sourceMap: ['<%= meta.distPath %>css/*.map']
 		},
 
-		concat: {
-			dmui: {
-				options: {
-					banner: '<%= banner %>'
-				},
-				src: [
-					'js/dmui.js',
-					'js/core.js'
-				],
-				dest: '<%= meta.distPath %>js/<%= pkg.name %>.js'
-			}
-		},
-
+		//css
 		sass: {
 			options: {
 				banner: '<%= banner %>',
@@ -97,21 +86,7 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-
-		copy: {
-			fonts: {
-				expand: true,
-				src: 'fonts/dmui*.ttf',
-				dest: '<%= meta.distPath %>/'
-			},
-			examples: {
-				expand: true,
-				cwd: '<%= meta.distPath %>',
-				src: ['**/dmui*'],
-				dest: '<%= meta.examplesPath %>'
-			}
-		},
-
+		
 		cssmin: {
 			options: {
 				banner: '', // set to empty; see bellow
@@ -124,6 +99,20 @@ module.exports = function(grunt) {
 			}
 		},
 
+		//no amd js build
+		concat: {
+			dmui: {
+				options: {
+					banner: '<%= banner %>'
+				},
+				src: [
+					'js/index.js',
+					'js/core.js'
+				],
+				dest: '<%= meta.distPath %>js/<%= pkg.name %>.js'
+			}
+		},
+		
 		uglify: {
 			options: {
 				banner: '<%= banner %>',
@@ -160,7 +149,22 @@ module.exports = function(grunt) {
 				tasks: 'dist'
 			}
 		},
+		
+		copy: {
+			fonts: {
+				expand: true,
+				src: 'fonts/dmui*.ttf',
+				dest: '<%= meta.distPath %>/'
+			},
+			examples: {
+				expand: true,
+				cwd: '<%= meta.distPath %>',
+				src: ['**/dmui*'],
+				dest: '<%= meta.examplesPath %>'
+			}
+		},
 
+		//js
 		build: {
 			all: {
 				dest: "dist/dmui.js",
@@ -208,6 +212,31 @@ module.exports = function(grunt) {
 			grunt: { src: '<%= jshint.grunt.src %>' },
 			src: { src: '<%= jshint.src.src %>' }
 		},
+		
+		//test
+		babel: {
+			options: {
+				sourceMap: "inline",
+				retainLines: true
+			},
+			nodeSmokeTests: {
+				files: {
+					"test/node_smoke_tests/lib/ensure_iterability.js":
+						"test/node_smoke_tests/lib/ensure_iterability_es6.js"
+				}
+			}
+		},
+		
+		testswarm: {
+			tests: [
+				// A special module with basic tests, meant for
+				// not fully supported environments like Android 2.3,
+				// jsdom or PhantomJS. We run it everywhere, though,
+				// to make sure tests are not broken.
+				"core"
+				
+			]
+		},
 
 		csslint: {
 			options: {
@@ -235,18 +264,22 @@ module.exports = function(grunt) {
 	require('time-grunt')(grunt);
 	grunt.loadTasks( "build/tasks" );
 	// Default task(s).
-	//grunt.registerTask( 'lint', [ 'jsonlint', 'jshint', 'jscs' ] );
-	grunt.registerTask( 'lint', [ 'jsonlint', 'jshint' ] );
+	grunt.registerTask( 'lint', [ 'jsonlint', 'jshint', 'jscs' ] );
+	//grunt.registerTask( 'lint', [ 'jsonlint', 'jshint' ] );  // with out test
 	
 	grunt.registerTask('cleanAll', ['clean']);
 	//grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin', 'clean:sourceMap']);
 	grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin']);
 	//grunt.registerTask('dist-js', ['concat', 'build-namespace', 'uglify']);
-	grunt.registerTask('dist-js', ['uglify']);
-	grunt.registerTask('dist', ['dist-css', 'dist-js', 'copy']);
-	grunt.registerTask('dev', ['clean:all', 'build:*:*','lint','dist']);
+	grunt.registerTask('dist-js', [ 'build:*:*','lint', 'uglify']);   //for amd
+	grunt.registerTask('dist', ['dist-css', 'dist-js', 'copy']); 
+	grunt.registerTask('dev', ['clean:all', 'dist']);
 	grunt.registerTask('default', ['dev']);
 
+	grunt.registerTask( "test_fast", runJsdomTests ? [ "node_smoke_tests" ] : [] );
+	//grunt.registerTask( "test", [ "test_fast" ].concat( runJsdomTests ? [ "promises_aplus_tests" ] : [] ) );
+	grunt.registerTask( "test", [ 'node_smoke_tests' ] ) ;
+	
 	grunt.registerTask('build-namespace', generateNamespace);
 
 	grunt.registerTask('server', ['dist','watch']);

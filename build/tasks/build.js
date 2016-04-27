@@ -21,7 +21,7 @@ module.exports = function( grunt ) {
 		wrapper = read( "wrapper.js" ).split( /\/\/ \@CODE\n\/\/[^\n]+/ ),
 		config = {
 			baseUrl: "js",
-			name: "dmui",
+			name: "index",
 
 			// Allow strict mode
 			useStrict: true,

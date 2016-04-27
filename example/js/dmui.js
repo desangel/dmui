@@ -6,7 +6,7 @@
  * Released under the MIT license
  * https://github.com/desangel/dmui/license
  *
- * Date: 2016-04-27T06:34Z
+ * Date: 2016-04-27T08:22Z
  */
 ( function( global, factory ) {
 

@@ -1,7 +1,7 @@
 module.exports = function( grunt ) {
 
 	"use strict";
-	return;
+	
 	var fs = require( "fs" ),
 		spawnTest = require( "./lib/spawn_test.js" ),
 		testsDir = "./test/node_smoke_tests/",
