@@ -47,7 +47,7 @@ module.exports = function(grunt) {
 			distPath: 'dist/',
 			jsPath: 'js/',
 			sassPath: 'sass/',
-			examplesPath: 'examples/hello-dmui/'
+			examplesPath: 'example/'
 		},
 
 		banner: '/*!\n' +
@@ -239,11 +239,12 @@ module.exports = function(grunt) {
 	grunt.registerTask( 'lint', [ 'jsonlint', 'jshint' ] );
 	
 	grunt.registerTask('cleanAll', ['clean']);
-	grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin', 'clean:sourceMap']);
+	//grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin', 'clean:sourceMap']);
+	grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin']);
 	//grunt.registerTask('dist-js', ['concat', 'build-namespace', 'uglify']);
 	grunt.registerTask('dist-js', ['uglify']);
-	grunt.registerTask('dist', ['clean:all', 'dist-css', 'dist-js', 'copy']);
-	grunt.registerTask('dev', ['build:*:*','lint','dist-js']);
+	grunt.registerTask('dist', ['dist-css', 'dist-js', 'copy']);
+	grunt.registerTask('dev', ['clean:all', 'build:*:*','lint','dist']);
 	grunt.registerTask('default', ['dev']);
 
 	grunt.registerTask('build-namespace', generateNamespace);

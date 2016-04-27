@@ -6,18 +6,22 @@
 	<meta name="keywords" content="dmui"/>
 	<meta name="description" content="dmui"/>
 	<title>dmui demo</title>
-	<!-- <link rel="stylesheet" href="../dist/css/dmui.css"> -->
-	<script src="../dist/js/dmui.min.js"></script>
+	<link rel="stylesheet" href="css/dmui.css">
+	<script src="js/dmui.min.js"></script>
 <style>
 
 </style>
 <script>
-	
 	function onload(){
 		console.log(new dmui());
 	}
 </script>
 </head>
 <body onload="onload()">
+	<header class="dmui-bar dmui-bar-nav">
+		<a class="dmui-icon dmui-icon-bars dmui-pull-left dmui-plus-visible"></a>
+		<a id="info" class="dmui-icon dmui-icon-info-filled dmui-pull-right" style="color: #999;"></a>
+		<h1 class="dmui-title">dmui Index</h1>
+	</header>
 </body>
 </html>
