@@ -32,7 +32,7 @@ module.exports = function( Release ) {
 		 * Set the version in the src folder for distributing AMD
 		 */
 		_setSrcVersion: function() {
-			var corePath = __dirname + "/../js/core.js",
+			var corePath = __dirname + "/../../src/js/core.js",
 				contents = fs.readFileSync( corePath, "utf8" );
 			contents = contents.replace( /@VERSION/g, Release.newVersion );
 			fs.writeFileSync( corePath, contents, "utf8" );

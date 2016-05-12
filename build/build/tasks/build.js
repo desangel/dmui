@@ -12,7 +12,7 @@ module.exports = function( grunt ) {
 		requirejs = require( "requirejs" ),
 		Insight = require( "insight" ),
 		pkg = require( "../../package.json" ),
-		srcFolder = __dirname + "/../../js/",
+		srcFolder = __dirname + "/../../../src/js/",
 		rdefineEnd = /\}\s*?\);[^}\w]*$/,
 		read = function( fileName ) {
 			return grunt.file.read( srcFolder + fileName );
@@ -20,7 +20,7 @@ module.exports = function( grunt ) {
 		globals = read( "exports/global.js" ),
 		wrapper = read( "wrapper.js" ).split( /\/\/ \@CODE\n\/\/[^\n]+/ ),
 		config = {
-			baseUrl: "js",
+			baseUrl: srcFolder,
 			name: "index",
 
 			// Allow strict mode

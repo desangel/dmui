@@ -1,16 +1,15 @@
 {
 	"boss": true,
-	"curly": true,
+	"curly": false,
 	"eqeqeq": true,
 	"eqnull": true,
 	"expr": true,
 	"immed": true,
 	"noarg": true,
-	
+	"sub": true,
 	"undef": true,
 	"unused": true,
-
-	"sub": true,
+	"node": true,
 
 	// Support: IE <=9 only, Android <=4.0 only
 	// The above browsers are failing a lot of tests in the ES5

@@ -29,13 +29,13 @@ module.exports = function(grunt) {
 	var fs = require( "fs" ),
 		//gzip = require( "gzip-js" ),
 		
-		srcHintOptions = readOptionalJSON( "js/.jshintrc" ),
+		srcHintOptions = readOptionalJSON( "../src/js/.jshintrc" ),
 		
 		// Skip jsdom-related tests in Node.js 0.10 & 0.12
 		runJsdomTests = !/^v0/.test( process.version );
 		
 	if ( !grunt.option( "filename" ) ) {
-		grunt.option( "filename", "js/dmui.js" );
+		grunt.option( "filename", "../temp/index.js" );  //build task output path
 	}
 	// Project configuration.
 	grunt.initConfig({
@@ -43,11 +43,19 @@ module.exports = function(grunt) {
 
 		// Metadata.
 		meta: {
-			libPath: 'libs/',
-			distPath: 'dist/',
-			jsPath: 'js/',
-			sassPath: 'sass/',
-			examplesPath: 'example/'
+			main: {
+				jsMain: 'index.js',
+				sassMain: 'main.scss'
+			},
+			path: {
+				basePath: '../',
+				libPath: 'libs/',
+				distPath: 'dist/',
+				jsPath: 'src/js/',
+				sassPath: 'src/sass/',
+				examplesPath: 'example/',
+				tempPath: 'temp/'
+			}
 		},
 
 		banner: '/*!\n' +
@@ -58,8 +66,9 @@ module.exports = function(grunt) {
 
 		//tasks
 		clean: {
-			all: ['<%= meta.distPath %>'],
-			sourceMap: ['<%= meta.distPath %>css/*.map']
+			all: ['<%= meta.path.distPath %>'],
+			temp: ['temp'],
+			sourceMap: ['<%= meta.path.distPath %>css/*.map']
 		},
 
 		//css
@@ -71,7 +80,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				files: {
-					'<%= meta.distPath %>css/<%= pkg.name %>.css': 'sass/dmui.scss'
+					'<%= meta.path.distPath %>css/<%= pkg.name %>.css': '<%= meta.path.basePath %><%= meta.path.sassPath %><%= meta.main.sassMain %>'
 				}
 			}
 		},
@@ -82,7 +91,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				files: {
-					'<%= meta.distPath %>/css/<%= pkg.name %>.css': '<%= meta.distPath %>/css/<%= pkg.name %>.css'
+					'<%= meta.path.distPath %>/css/<%= pkg.name %>.css': '<%= meta.path.distPath %>/css/<%= pkg.name %>.css'
 				}
 			}
 		},
@@ -94,11 +103,61 @@ module.exports = function(grunt) {
 				sourceMap: false
 			},
 			dmui: {
-				src: '<%= meta.distPath %>css/<%= pkg.name %>.css',
-				dest: '<%= meta.distPath %>css/<%= pkg.name %>.min.css'
+				src: '<%= meta.path.distPath %>css/<%= pkg.name %>.css',
+				dest: '<%= meta.path.distPath %>css/<%= pkg.name %>.min.css'
 			}
 		},
 
+		//js
+		jsonlint: {
+			pkg: {
+				src: [ 'package.json' ]
+			}
+		},
+		
+		jshint: {
+			options: {
+				jshintrc: '<%= meta.path.basePath %><%= meta.path.jsPath %>.jshintrc'
+			},
+			all: {
+				src: [
+					"<%= meta.path.distPath %>/*.js" //, "Gruntfile.js", "test/**/*.js", "build/**/*.js"
+				],
+				options: {
+					jshintrc: true
+				}
+			},
+			dist: {
+				src: "<%= meta.path.distPath %>/*.js",
+				options: srcHintOptions
+			},
+			grunt: {
+				src: ['Gruntfile.js', 'grunt/*.js']
+			},
+			src: {
+				src: '<%= meta.path.basePath %><%= meta.path.jsPath %>*'
+			}
+		},
+
+		jscs: {
+			options: {
+				config: '.jscsrc'
+			},
+			//docs: { src: '<%= jshint.docs.src %>' },
+			grunt: { src: '<%= jshint.grunt.src %>' },
+			src: { src: '<%= jshint.src.src %>' }
+		},
+		
+		//js
+		build: {
+			all: {
+				dest: "<%= meta.path.tempPath %>index.js",
+				minimum: [
+					"core"
+				]
+			}
+		},
+		
 		//no amd js build
 		concat: {
 			dmui: {
@@ -106,10 +165,9 @@ module.exports = function(grunt) {
 					banner: '<%= banner %>'
 				},
 				src: [
-					'js/index.js',
-					'js/core.js'
+					'<%= meta.path.tempPath %>index.js'
 				],
-				dest: '<%= meta.distPath %>js/<%= pkg.name %>.js'
+				dest: '<%= meta.path.distPath %>js/<%= pkg.name %>.js'
 			}
 		},
 		
@@ -126,10 +184,29 @@ module.exports = function(grunt) {
 					unused: false
 				}
 			},
-			dmui: {
-				//src: '<%= concat.dmui.dest %>',
-				src: '<%= meta.distPath %>js/<%= pkg.name %>.js',
-				dest: '<%= meta.distPath %>js/<%= pkg.name %>.min.js'
+			main: {
+				src: '<%= meta.path.distPath %>js/<%= pkg.name %>.js',
+				dest: '<%= meta.path.distPath %>js/<%= pkg.name %>.min.js'
+			}
+		},
+		
+		copy: {
+			fonts: {
+				expand: true,
+				src: '<%= meta.path.basePath %>fonts/dmui*.ttf',
+				dest: '<%= meta.path.basePath %><%= meta.distPath %>/'
+			},
+			dist: {
+				expand: true,
+				cwd: '<%= meta.path.distPath %>',
+				src: ['**/<%= pkg.name %>*'],
+				dest: '<%= meta.path.basePath %><%= meta.path.distPath %>'
+			},
+			examples: {
+				expand: true,
+				cwd: '<%= meta.path.basePath %><%= meta.path.distPath %>',
+				src: ['**/<%= pkg.name %>*'],
+				dest: '<%= meta.path.basePath %><%= meta.path.examplesPath %>'
 			}
 		},
 
@@ -143,76 +220,12 @@ module.exports = function(grunt) {
 			},
 			scripts: {
 				files: [
-					'<%= meta.sassPath %>/**/*.scss',
-					'<%= meta.jsPath %>/**/*.js'
+					'<%= meta.path.basePath %><%= meta.path.sassPath %>/**/*.scss',
+					'<%= meta.path.basePath %><%= meta.path.jsPath %>/**/*.js'
 				],
 				tasks: 'dist'
 			}
 		},
-		
-		copy: {
-			fonts: {
-				expand: true,
-				src: 'fonts/dmui*.ttf',
-				dest: '<%= meta.distPath %>/'
-			},
-			examples: {
-				expand: true,
-				cwd: '<%= meta.distPath %>',
-				src: ['**/dmui*'],
-				dest: '<%= meta.examplesPath %>'
-			}
-		},
-
-		//js
-		build: {
-			all: {
-				dest: "dist/dmui.js",
-				minimum: [
-					"core"
-				]
-			}
-		},
-		
-		jsonlint: {
-			pkg: {
-				src: [ 'package.json' ]
-			}
-		},
-		
-		jshint: {
-			all: {
-				src: [
-					"js/*.js" //, "Gruntfile.js", "test/**/*.js", "build/**/*.js"
-				],
-				options: {
-					jshintrc: true
-				}
-			},
-			dist: {
-				src: "dist/js/dmui.js",
-				options: srcHintOptions
-			},
-			options: {
-				jshintrc: 'js/.jshintrc'
-			},
-			grunt: {
-				src: ['Gruntfile.js', 'grunt/*.js']
-			},
-			src: {
-				src: 'js/*.js'
-			}
-		},
-
-		jscs: {
-			options: {
-				config: '.jscsrc'
-			},
-			//docs: { src: '<%= jshint.docs.src %>' },
-			grunt: { src: '<%= jshint.grunt.src %>' },
-			src: { src: '<%= jshint.src.src %>' }
-		},
-		
 		//test
 		babel: {
 			options: {
@@ -271,11 +284,14 @@ module.exports = function(grunt) {
 	//grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin', 'clean:sourceMap']);
 	grunt.registerTask('dist-css', ['sass', 'csscomb', 'cssmin']);
 	//grunt.registerTask('dist-js', ['concat', 'build-namespace', 'uglify']);
-	grunt.registerTask('dist-js', [ 'build:*:*','lint', 'uglify']);   //for amd
+	grunt.registerTask('dist-js', [ 'build:*:*', 'concat', 'lint', 'uglify']);   //for amd
 	grunt.registerTask('dist', ['dist-css', 'dist-js', 'copy']); 
 	grunt.registerTask('dev', ['clean:all', 'dist']);
 	grunt.registerTask('default', ['dev']);
 
+	grunt.registerTask('dev-js', ['clean', 'dist-js', 'copy']);
+	grunt.registerTask('dev-css', ['clean', 'dist-css', 'copy']);
+	
 	grunt.registerTask( "test_fast", runJsdomTests ? [ "node_smoke_tests" ] : [] );
 	//grunt.registerTask( "test", [ "test_fast" ].concat( runJsdomTests ? [ "promises_aplus_tests" ] : [] ) );
 	grunt.registerTask( "test", [ 'node_smoke_tests' ] ) ;

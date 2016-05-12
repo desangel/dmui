@@ -1,4 +1,9 @@
 /*!
+ * =====================================================
+ * dmui v0.1.0 (http://www.91holy.com)
+ * =====================================================
+ */
+/*!
  * dmui JavaScript Library v0.1.0
  * https://dmui.com/
 
@@ -6,7 +11,7 @@
  * Released under the MIT license
  * https://github.com/desangel/dmui/license
  *
- * Date: 2016-04-27T08:22Z
+ * Date: 2016-05-12T02:55Z
  */
 ( function( global, factory ) {
 
